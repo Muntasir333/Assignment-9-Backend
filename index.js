@@ -38,17 +38,29 @@ async function run() {
         res.json(result);
     });
 
-    app.get('/allfacilities/:id', async (req, res) => {
+    app.get('/add-facility/:id', async (req, res) => {
         const id = req.params.id;
         const result = await collection.findOne({ _id: new ObjectId(id) });
         res.json(result);
     });
-    app.delete('/allfacilities/:id', async (req, res) => {
+    app.delete('/add-facility/:id', async (req, res) => {
     const id = req.params.id;
 
     const result = await collection.deleteOne({
         _id: new ObjectId(id)
     });
+
+    res.send(result);
+});
+app.put('/add-facility/:id', async (req, res) => {
+
+    const id = req.params.id;
+    const updatedData = req.body;
+
+    const result = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        {$set: updatedData}
+    );
 
     res.send(result);
 });
