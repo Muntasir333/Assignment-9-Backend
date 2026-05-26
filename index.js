@@ -19,6 +19,13 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+const verifyToken =(req, res, next) =>{
+      const header = req.headers['authorization'];
+      console.log(header);
+      if (!header) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      } next();
+    };
 
 async function run() {
   try {
@@ -28,23 +35,23 @@ async function run() {
     const collection = db.collection("facility");
     const bookingCollection = db.collection("booking");
 
-    app.get('/add-facility', async (req, res) => {
+    app.get('/add-facility', verifyToken,  async (req, res) => {
         const facilities = await collection.find({}).toArray();
         res.json(facilities);
     });
-    app.post('/add-facility', async (req, res) => {
+    app.post('/add-facility', verifyToken, async (req, res) => {
         const facility = req.body;
         console.log(facility);
         const result = await collection.insertOne(facility);
         res.json(result);
     });
 
-    app.get('/add-facility/:id', async (req, res) => {
+    app.get('/add-facility/:id', verifyToken, async (req, res) => {
         const id = req.params.id;
         const result = await collection.findOne({ _id: new ObjectId(id) });
         res.json(result);
     });
-    app.delete('/add-facility/:id', async (req, res) => {
+    app.delete('/add-facility/:id', verifyToken, async (req, res) => {
     const id = req.params.id;
 
     const result = await collection.deleteOne({
@@ -53,7 +60,7 @@ async function run() {
 
     res.send(result);
 });
-app.put('/add-facility/:id', async (req, res) => {
+app.put('/add-facility/:id', verifyToken, async (req, res) => {
 
     const id = req.params.id;
     const updatedData = req.body;
@@ -66,18 +73,18 @@ app.put('/add-facility/:id', async (req, res) => {
     res.send(result);
 });
 
-app.post ('/booking', async (req, res) => {
+app.post ('/booking', verifyToken, async (req, res) => {
     const booking = req.body;
     const result = await bookingCollection.insertOne(booking);
     res.json(result);
 });
-app.get ('/booking/:userId', async (req, res) => {
+app.get ('/booking/:userId', verifyToken, async (req, res) => {
     const userId = req.params.userId;
     const bookings = await bookingCollection.find({ userId: userId }).toArray();
     res.json(bookings);
 });
 
-app.delete ('/booking/:bookingId', async (req, res) => {
+app.delete ('/booking/:bookingId', verifyToken, async (req, res) => {
     const bookingId = req.params.bookingId;
     const result = await bookingCollection.deleteOne({ _id: new ObjectId(bookingId) });
     res.json(result);
