@@ -35,7 +35,7 @@ async function run() {
     const collection = db.collection("facility");
     const bookingCollection = db.collection("booking");
 
-    app.get('/add-facility', verifyToken,  async (req, res) => {
+    app.get('/add-facility',  async (req, res) => {
         const facilities = await collection.find({}).toArray();
         res.json(facilities);
     });
