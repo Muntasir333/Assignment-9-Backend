@@ -35,16 +35,38 @@ async function run() {
     const collection = db.collection("facility");
     const bookingCollection = db.collection("booking");
 
-    app.get('/add-facility',  async (req, res) => {
-        const facilities = await collection.find({}).toArray();
-        res.json(facilities);
-    });
-    app.post('/add-facility', verifyToken, async (req, res) => {
-        const facility = req.body;
-        console.log(facility);
-        const result = await collection.insertOne(facility);
-        res.json(result);
-    });
+app.get('/add-facility', async (req, res) => {
+  try {
+    const search = req.query.search || '';
+    const sort = req.query.sort || '';
+    const query = {
+      facilityName: {
+        $regex: search,
+        $options: 'i',
+      },
+    };
+    let sortOption = {};
+
+    if (sort === 'name_asc') {
+      sortOption = { facilityName: 1 };
+    } else if (sort === 'name_desc') {
+      sortOption = { facilityName: -1 };
+    } else if (sort === 'newest') {
+      sortOption = { createdAt: -1 };
+    } else if (sort === 'oldest') {
+      sortOption = { createdAt: 1 };
+    }
+    const facilities = await collection
+      .find(query)
+      .sort(sortOption)
+      .toArray();
+
+    res.json(facilities);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
     app.get('/add-facility/:id', verifyToken, async (req, res) => {
         const id = req.params.id;
