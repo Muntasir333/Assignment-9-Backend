@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -68,7 +67,53 @@ app.get('/add-facility', async (req, res) => {
   }
 });
 
-    app.get('/add-facility/:id', verifyToken, async (req, res) => {
+app.post('/add-facility', verifyToken, async (req, res) => {
+    const facility = req.body;
+    facility.createdAt = new Date();
+    const result = await collection.insertOne(facility);
+    res.json(result);
+});
+
+app.get('/my-facilities/:email', async (req, res) => {
+  try {
+    const email = req.params.email;
+
+    const facilities = await collection
+      .find({ ownerEmail: email })
+      .toArray();
+
+    res.json(facilities);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete('/facility/:id', verifyToken, async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const result = await collection.deleteOne({
+      _id: new ObjectId(id)
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Facility not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Facility deleted successfully",
+      result
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+});
+
+    app.get('/add-facility/:id', async (req, res) => {
         const id = req.params.id;
         const result = await collection.findOne({ _id: new ObjectId(id) });
         res.json(result);
